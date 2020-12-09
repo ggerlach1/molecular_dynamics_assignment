@@ -1,0 +1,174 @@
+\documentclass[11pt]{article}
+\usepackage{epsf,epsfig,subfigure}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage[dvipsnames]{xcolor}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+}
+
+\topmargin -1.0in
+\oddsidemargin -.1 in
+\textwidth 7in
+\textheight 10.0in
+\footskip 0.25in
+
+\newcommand{\bc}{\begin{center}} 
+\newcommand{\ec}{\end{center}} 
+\newcommand{\bi}{\begin{itemize}} 
+\newcommand{\ei}{\end{itemize}} 
+\newcommand{\be}{\begin{equation}} 
+\newcommand{\ee}{\end{equation}} 
+\newcommand{\me}{\mathrm{e}}
+
+\lstset{frame=tb,
+  language=Matlab,
+  basicstyle={\small\ttfamily},
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{OliveGreen},
+}
+
+\begin{document}
+
+
+% Front matter
+%----------------------------------------------------------------------
+\noindent{\bf MSCBIO 2030/CMPBIO 2030/COBB 2030} \\
+\noindent{\bf Introduction to Computational Structural Biology} \\
+\noindent{\bf MSMBPH/MOLBPH 2013} \\
+\noindent{\bf Molecular Biophysics 3: Theory and Simulation} \\
+\vspace*{12pt}
+
+\noindent{\bf Molecular Dynamics Assignment -- Due XX/XX/XX } \\
+\noindent Authors: Gabriella Gerlach, Daniel Pe\~{n}aherrera, Tim Lezon
+\vspace{12pt}
+%----------------------------------------------------------------------
+
+\section*{Notes for next year}
+- students need to be assigned mutations, the mutations should not be to residue one and they should not be to Gly (both of these make calculating side chain angles impossible) 
+- giving students a month just means that they put this off even though a month into the semester is much busier than when this is assigned
+- I think something should be adjusted to change this
+- All the files are still on the cluster in \texttt{/net/dali/home/mscbio/structbio/struct\_MD/} and can be used in future years
+
+
+\section*{Introduction}
+Proper protein function requires coordinated intramolecular motions, and molecular dynamics (MD) simulations remain the state-of-the-art for computationally exploring protein structural dynamics. In this assignment, you will simulate Peptide-bound SARS-CoV-2 Nsp9 RNA-replicase (PDB:6W9Q). Check out the paper (https://doi.org/10.1016/j.isci.2020.101258): It's an interesting protein. 
+
+\section*{What you should do}
+\begin{enumerate}
+  \item Perform two T= 300K explicit-solvent MD simulations of the selected protein. One simulation is of the protein as it appears in the PDB, and the other is of the protein with a unique point mutation. Use the protocol explained in lab. Run each simulation for 50ns.
+  \item Plot time-traces and probability density functions (pdfs) for each of the following variables, and write a paragraph explaining what you infer about structure and sampling for each variable.
+    \begin{enumerate}
+    \item RMSD with respect to the initial structure
+    \item RMSD with respect to another structure from the trajectory having large RMSD (maximal or nearly so) from the initial structure
+    \item Backbone dihedral angles ($\phi$ and $\psi$) of your mutated residue and another residue of your choice that is selected to exhibit a diversity of behavior
+    \item Side-chain dihedrals ($\chi$) of your mutated residue and another residue of your choice, selected to exhibit a diversity of behavior
+    \item Solvent-accessible surface area (SASA) of a residue for which the SASA varies significantly throughout at least one of the simulations
+    \end{enumerate}
+  \item Make a scatter plot of RMSD pairs from 2a and 2b. On the basis of this and your other plots, discuss how many configurational states may be present in each simulation. Explain what you mean by ``state.''
+  \item Using the preceding plots and the concept of time correlations, explain the degree to which your peptide is well-sampled in each simulation. Additional computations are not required, but you should be as precise as possible in your discussion. You should address the possible presence of multiple timescales and estimate the slowest one that is observable from your data. Would you arrive at the same conclusion if you analyzed both simulations together?
+  \item Using scatter plots of pairs of dihedral angles, identify one pair of angles that is relatively highly correlated and another pair that is relatively uncorrelated. Show these two scatter plots. Use probability concepts from class to justify your conclusions.
+  \item Compare the results obtained from the two separate MD runs. Discuss the differences between conclusions drawn from two 25ns runs and one 50ns run.
+\end{enumerate}
+
+
+\section*{Grading Rubric}
+
+\subsection*{Scientific Writing (16pts)}
+The purpose of the report is to concisely convey your objectives, methods, results and conclusions to the general reader who has not seen the assignment. It is expected to be of professional quality and should be typed and submitted as a single PDF file. Figures should be captioned and embedded appropriately within the text. All variables appearing in equations should be described. Code snippets should {\bf not} appear in the report.
+
+\subsection*{Required Components (6pts each)}
+Each bullet point above indicates a required component of the report and is worth six points. Note that the bullets do not need to be answered separately: For example, data values and functional fits should appear on the same plot.
+
+
+
+\newpage
+\begin{center}
+    \Large{\textbf{Running an AMBER MD simulation on the CSB Cluster}}\\*
+\end{center}
+\small{Author: Gabriella Gerlach}
+
+\section*{Setting up protein}
+First, download PyMOL from the instructions previously given. They are also on Canvas. Next, get the pdb file from the protein data bank and open it in PyMOL. You will notice that there is protein, water, and a phosphate. We are only interested in the protein, so delete everything else. 
+\newline
+\newline
+Using the Mutagenesis wizard (\texttt{Wizard->Mutagenesis->protein}) select the residue you are assigned to mutate. On the right-hand side of the PyMOL UI, a new panel with mutatgenesis options should become available. Click \texttt{No Mutation} and select the three letter code corresponding to the residue you are mutating to, click \texttt{apply}, and then click \texttt{done}. Look at and click on the location of the mutation to ensure that you have the mutation you want. 
+\newline
+\newline
+Save the mutated protein to your working directory as a PDB file. 
+\section*{Setting up the simulation}
+
+The steps to set up an MD simulation no matter the method you use are essentially the following:
+\begin{enumerate}
+    \item Solvate the system (add water)
+    \item Minimize the system (run at zero temperature to relax high-energy interactions)
+    \item Heat the system to the temperature of interest (generally 300K)
+    \item Equilibrate the system (simulate with restricted movement to relax high energy interactions further) 
+\end{enumerate}
+
+These steps are required so that the simulation is not started at an unfavorable energy conformation which will cause it to fail. There are a multitude of methods for performing these steps some via a GUI, via websites, and by scripting. The third option allows for the most customization and leads to greater understanding of what is happening (in my opinion). Don't worry though we will provide you with all the necessary files.   
+
+\begin{enumerate}
+    \item Connect to the Pitt VPN \href{https://www.technology.pitt.edu/services/pittnet-vpn-pulse-secure}{Pulse secure} 
+    \item Open Terminal (or equivalent) and \texttt{ssh user@cluster.csb.pitt.edu} your user name should be the same as your pitt.edu email (Pitt students) and your CMU user name (CMU students) 
+    \item The password is: \textbf{________} you will need to change it. This is done with \texttt{passwd}. I would recommend changing it to the same password as your Pitt account. You will be prompted to enter your current password (_______), then a new password, then the new password again. There will be no characters showing that you are typing, but I promise it is typing.
+    \item create a working directory for the assignment on the cluster \texttt{mkdir MD\_assignment} (or whatever)
+    \item From your local computer, where the PDB file was saved from Pymol is located, copy the file to the cluster using scp:
+    \subitem \texttt{scp file.pdb user@cluster.csb.pitt.edu:/net/dali/home/mscbio/USER/YOUR/FILE/PATH}
+    \item copy the contents of \texttt{/net/dali/home/mscbio/structbio/struct\_MD/} to your working directory (\texttt{cp /net/dali/home/mscbio/structbio/struct\_MD/* /YOUR/FILE/PATH/}) 
+\end{enumerate}
+
+\subsection{Creation of input files}
+To start a simulation we need to generate parameter and topology files which contain the information AMBER uses to start and run a simulation. To do this we will use \texttt{tleap}. There is a file called \texttt{tleap.input} open it and \textcolor{red}{make the required edits described in the file.}
+\newline
+\newline
+To run \texttt{tleap} you will submit a job to the queue. 
+\begin{enumerate}
+    \item There is a file \texttt{run\_setup.slurm}, open it make sure you understand what it does. The cluster uses slurm, so this is a slurm submission script. 
+    \item To submit it: \texttt{sbatch run\_setup.slurm}
+    \item This is fairly quick you can check if it is running using \texttt{squeue -u USER}. 
+\end{enumerate}
+
+Once it has completed you should have 6 new files sitting in your working directory. \textbf{Do you know what each is for?}
+
+
+\subsection{Minimization, heating, equilibration}
+
+These three events are preformed by taking your starting structure generated using \texttt{tleap} and minimizing it, taking that structure and heating it and taking the heated system and equilibrating it. Again I have provided you with the necessary files. For each step you will use the solvated \texttt{parm7} file generated above, an \texttt{mdin} file, and the \texttt{rst7} file from the previous step. These steps shouldn't take more than a couple minutes once submitted to the cluster, but they \textbf{MUST BE DONE SEQUENTIALLY} the minimization has to be complete before you can start the heating ect.
+
+\begin{enumerate}
+    \item Minimization
+    \begin{enumerate}
+        \item open \texttt{1\_mini.mdin} read the comments and make sure you understand what is going on.
+        \item open \texttt{1\_mini.slurm} change \texttt{xxxNAMExxx} to the name of your system. In the previous step you created a file called \texttt{SYSTEM.parm7}. Whatever your SYSTEM is, you should replace xxxNAMExxx with it. A quick way to do this is to make your file edits using \textcolor{ForestGreen}{\texttt{vim}} and while in \textcolor{ForestGreen}{\textttt{NORMAL} mode} enter \textcolor{ForestGreen}{\testttt{:\%s/xxxNAMExxx/SYSTEM/gc}}. Once you have made the necessary edits, submit this file to \texttt{slurm} in the same manor as above.
+        \item check \texttt{SYSTEM\_mini.mdout} file to make sure it ran correctly. \textbf{How do you know?}
+    \end{enumerate}
+    \item Heating
+    \begin{enumerate}
+        \item open \texttt{2\_heat.mdin} read the comments to make sure you understand what is going on.
+        \item open \texttt{2\_heat.slurm} change the necessary lines and submit it in the same manor as above.
+        \item check \texttt{SYSTEM\_heat.mdout} file to make sure it ran correctly. \textbf{How do you know?}
+    \end{enumerate}
+    \item Equilibration
+    \begin{enumerate}
+        \item open \texttt{3\_eq.mdin} read the comments to make sure you understand what is going on.
+        \item open \texttt{3\_eq.slurm} change the necessary lines and submit it in the same manor as above this one will take ~ 10 minutes.
+        \item check \texttt{SYSTEM\_eq.mdout} file to make sure it ran correctly. \textbf{How do you know?}
+    \end{enumerate}
+    
+\end{enumerate}
+
+If all of these steps have finished correctly you are now ready to run the production step. This is the actual simulation.
+
+\subsection{Production}
+The final \texttt{mdin} file is \texttt{4\_prod.mdin} again, open this make sure you know what it does. There is a file called \texttt{4\_prod.slurm} that you need to open, edit, and submit. A single run should take a few hours, dependent on how busy the cluster is at the time, and how fast of a GPU you get, so make sure you leave yourself plenty of time for these too run.
+
+You also have to run a simulation of the wild type (not mutated) protein so follow this same procedure but without creating the mutation in the beginning. I would recommend you create a different directory on the cluster for the second simulation.
+
+What to do once they have finished running will be the subject of our next recitation, so make sure they have been run by then!
+
+\end{document}

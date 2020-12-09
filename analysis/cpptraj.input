@@ -1,0 +1,22 @@
+# topology file
+parm xxxNAMExxx.parm7
+
+# simulation coordinates
+trajin xxxNAMExxx_eq_0ns.nc  lastframe
+trajin xxxNAMExxx_50ns.nc  1 last 1
+
+
+## remove water
+strip :WAT
+
+# automatic re-image coordinates
+autoimage :1-123@CA,C,N,O
+
+# aling it
+symmrmsd :1-123@CA,C,O,N 
+
+# write trajectory without water in .pdb format
+trajout xxxNAMExxx_50ns_stripped.pdb
+
+# execute everything
+run

@@ -1,0 +1,32 @@
+#!/usr/bin/env tleap
+
+# force field
+source leaprc.protein.ff14SB
+
+# water model
+source leaprc.water.tip3p
+
+
+
+set default PdbWriteCharges on
+
+##CHANGE xxxBASExxx to a name for your system and NAME_OF_FILE_FROM_PYMOL.pdb
+
+# system
+chip = loadPDB NAME_OF_FILE_FROM_PYMOL.pdb
+
+
+savepdb chip xxxBASExxx.pdb  #This pdb will just be an AMBER formated version of the one you input
+saveAmberParm chip xxxBASExxx_nowat.parm7 xxxBASExxx_nowat.rst7 # write out AMBER-compatible parameter/topolgy and coordinate files without water  
+
+
+# box 15 A far away
+solvateOct chip TIP3PBOX 9.0 #put water in an octahedral (as close to a circle shape as possible) around the protein such that water moelcules extend a minimum of 9 A from any protein atoms 
+
+
+# save topology files
+saveAmberParm chip xxxBASExxx.parm7 xxxBASExxx.rst7 #same as above but with water
+savepdb chip xxxBASExxx.solv.pdb
+
+# quit
+quit

@@ -1,0 +1,17 @@
+# topology file
+parm xxxNAMExxx_50ns_stripped.pdb
+
+# simulation coordinates
+trajin xxxNAMExxx_50ns_stripped.pdb  1 last 1
+
+#load the 10th frame of simulation to be used as a reference
+reference xxxNAMExxx_50ns_stripped.pdb onlyframes 10
+
+#get the rmsd of all the (protein) atoms (except hydrogen) with respect to the first frame
+rmsd :1-123&!@H= out xxxFILExxx.dat  
+
+#get the rmsd of all the (protein) atoms (except hydrogen) with respect to the 10th frame
+rmsd :1-123&!@H= reference out xxxFILExxx.dat  
+
+# execute everything
+run
